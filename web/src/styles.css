@@ -300,3 +300,22 @@ table.data input, table.data select, table.data textarea { width: 100%; }
 .run-goal { flex: 1 1 280px; }
 .review-item > .spread > .row.grow { flex: 1 1 220px; }
 .feed-head .grow { flex: 1 1 120px; }
+
+/* ---- about page ---- */
+.about-section { scroll-margin-top: 64px; }
+.about-body { font-size: 14px; line-height: 1.6; }
+.about-body p { margin: 6px 0; }
+.about-body ul, .about-body ol { margin: 6px 0; padding-left: 22px; }
+.about-body li { margin: 3px 0; }
+.about-body code { background: var(--bg-3); padding: 0 5px; border-radius: 4px; word-break: break-word; }
+.about-cmd { margin: 6px 0; padding: 8px 10px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; }
+.about-cmd code { background: none; padding: 0; }
+.about-table { margin: 8px 0; }
+.about-table td:first-child { white-space: nowrap; }
+.about-toc { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.about-toc a { font-size: 12.5px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line-2); color: var(--fg-2); background: var(--bg-3); }
+.about-toc a:hover { color: var(--fg); text-decoration: none; border-color: var(--fg-3); }
+.about-faq dt { font-weight: 600; margin-top: 10px; }
+.about-faq dd { margin: 2px 0 0; color: var(--fg-2); }
+.about .banner { margin: 8px 0; }
+@media (max-width: 720px) { .about-table td:first-child { white-space: normal; } }

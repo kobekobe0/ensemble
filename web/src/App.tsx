@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Toasts } from './components/Toasts';
+import { AboutPage } from './pages/About';
 import { Home } from './pages/Home';
 import { ProjectPage } from './pages/Project';
 import { RunPage } from './pages/Run';
@@ -25,6 +26,7 @@ export function App() {
   if ((m = path.match(/^\/runs\/([^/]+)/))) page = <RunPage key={m[1]} id={m[1]} />;
   else if ((m = path.match(/^\/projects\/([^/]+)/))) page = <ProjectPage key={m[1]} id={m[1]} />;
   else if (path.startsWith('/settings')) page = <SettingsPage />;
+  else if (path.startsWith('/about')) page = <AboutPage />;
   else page = <Home />;
 
   return (
@@ -37,6 +39,7 @@ export function App() {
         <nav>
           <Link to="/" exact>Projects</Link>
           <Link to="/settings">Settings</Link>
+          <Link to="/about">About</Link>
           <span className={`conn ${connected ? 'on' : ''}`} title={connected ? 'Live' : 'Reconnecting…'} aria-label={connected ? 'connected' : 'disconnected'} />
         </nav>
       </header>

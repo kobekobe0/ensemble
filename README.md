@@ -95,6 +95,10 @@ scripts/install-launchagent.sh
 
 (`scripts/install-launchagent.sh remove` to uninstall; logs go to `~/.ensemble/logs/server.log`.)
 
+## Benchmark
+
+[bench/](bench/README.md) has a mid-complexity task, hidden acceptance tests and scripts (`bench/setup.sh`, `bench/score.sh`) for comparing a Claude Code session with an Ensemble run on the same starting repo.
+
 ## How it works
 
 - **Plan → build → test → review → approve.** The lead (default `claude/opus`) returns a JSON plan of 1–8 tasks with dependencies. Each task gets a worktree on branch `ensemble/<run>/<task>` from the run's base commit, with dependency branches merged in. After the agent finishes, Ensemble commits, runs your test command (with up to `maxTestRetries` fix rounds), then asks a different provider to review. Critical issues trigger one fix round (`maxReviewFixRounds`). You then **Approve & merge** (`git merge --no-ff` into the base branch; the main tree must be clean), **Reject**, **Retry with feedback**, or **Reassign**.

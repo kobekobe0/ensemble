@@ -1,0 +1,10 @@
+{
+  "name": "bookshelf",
+  "version": "0.1.0",
+  "description": "A tiny personal book catalogue (library + CLI).",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test": "node --test"
+  }
+}
