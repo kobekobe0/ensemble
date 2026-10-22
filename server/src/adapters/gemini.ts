@@ -1,6 +1,10 @@
 // Gemini CLI adapter (§6.5).
-// VERIFY against `gemini --help` on the user's machine (not installed where this was written):
-//   gemini -p <prompt> --output-format stream-json [-m <model>] --approval-mode <auto_edit|default> [--resume <id>]
+// Verified against gemini 0.65 (`gemini --help` + bundled source):
+//   gemini -p <prompt> --output-format stream-json [-m <model>] --approval-mode <auto_edit|plan> --skip-trust [--resume <uuid>]
+// - `plan` is Gemini's read-only approval mode (used for planning/review).
+// - Headless runs abort in folders Gemini hasn't trusted, and every task worktree is a new folder, so
+//   `--skip-trust` trusts the folder for this invocation only (nothing is persisted).
+// - `--resume` accepts "latest", an index, or a full session UUID; sessions are stored per working directory.
 // Event field names are not fully documented, so the parser accepts several spellings.
 // Gemini reads stdin and combines it with -p, so large prompts are piped with a short -p instruction.
 import type { AgentEvent } from '../types.js';
@@ -12,7 +16,7 @@ const SHELL_TOOLS = /^(run_shell_command|shell|bash|run_command)$/i;
 export function geminiArgs(req: AgentRequest, viaStdin: boolean, extraArgs: string[] = []): string[] {
   const args = ['-p', viaStdin ? 'Follow the instructions provided on stdin.' : req.prompt, '--output-format', 'stream-json'];
   if (req.model) args.push('-m', req.model);
-  args.push('--approval-mode', req.readOnly ? 'default' : 'auto_edit');
+  args.push('--approval-mode', req.readOnly ? 'plan' : 'auto_edit', '--skip-trust');
   if (req.resumeSessionId) args.push('--resume', req.resumeSessionId);
   return [...args, ...extraArgs];
 }

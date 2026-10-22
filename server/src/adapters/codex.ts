@@ -1,5 +1,5 @@
 // OpenAI Codex CLI adapter (§6.4).
-// VERIFY against `codex exec --help` on the user's machine (not installed where this was written):
+// Verified against codex-cli 0.163 (`codex exec --help`, `codex exec resume --help`):
 //   codex exec --json -C <cwd> [-m <model>] --sandbox <workspace-write|read-only> <prompt>
 //   codex exec --json -C <cwd> [...] resume <sessionId> <prompt>
 // `-` as the prompt makes codex read it from stdin. Run `pnpm smoke` to check the parser against the real CLI.

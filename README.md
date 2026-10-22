@@ -68,16 +68,16 @@ Agents always work in isolated worktrees under `~/.ensemble/worktrees`, never in
 |---|---|---|
 | Claude | `--permission-mode acceptEdits` (edits files, no arbitrary shell) | `--permission-mode plan` |
 | Codex | `--sandbox workspace-write` | `--sandbox read-only` |
-| Gemini | `--approval-mode auto_edit` | `--approval-mode default` |
+| Gemini | `--approval-mode auto_edit --skip-trust` | `--approval-mode plan --skip-trust` |
 
 To give agents more autonomy, add flags under Settings → Providers → **Extra args** (appended to every call):
 
 - Claude, allow builds: `--allowedTools "Bash(npm *)" "Bash(pnpm *)" "Bash(dotnet *)"`
 - Claude, full autonomy (opt-in only): `--dangerously-skip-permissions`
-- Codex: `--full-auto`
+- Codex, full autonomy (opt-in only, no sandbox): `--dangerously-bypass-approvals-and-sandbox`
 - Gemini: `--yolo`
 
-Codex and Gemini flags were written from their docs, and those CLIs weren't installed on the machine this was built on. After installing them, run `pnpm smoke codex gemini`. It runs a tiny read-only prompt and prints the normalized events, so you can confirm the parsers match your CLI versions.
+Gemini's `--skip-trust` trusts each task worktree for that one invocation only, so headless runs don't abort in a new folder. It doesn't add the folder to Gemini's trusted list. Flags were verified against claude 2.1.296, codex-cli 0.163 and gemini 0.65. After a CLI update, run `pnpm smoke` (or `pnpm smoke codex`). It runs a tiny read-only prompt and prints the normalized events, so you can confirm the parsers still match.
 
 ## 7. Keep the Mac awake and online
 

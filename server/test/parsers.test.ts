@@ -125,7 +125,7 @@ describe('gemini parser', () => {
 
   it('builds args', () => {
     const base = { cwd: '/w', prompt: 'p', model: '', timeoutMs: 1, signal: new AbortController().signal, onEvent: () => {} };
-    expect(geminiArgs({ ...base, readOnly: false }, false)).toEqual(['-p', 'p', '--output-format', 'stream-json', '--approval-mode', 'auto_edit']);
-    expect(geminiArgs({ ...base, readOnly: true, model: 'gemini-2.5-flash', resumeSessionId: 'abc' }, false)).toEqual(['-p', 'p', '--output-format', 'stream-json', '-m', 'gemini-2.5-flash', '--approval-mode', 'default', '--resume', 'abc']);
+    expect(geminiArgs({ ...base, readOnly: false }, false)).toEqual(['-p', 'p', '--output-format', 'stream-json', '--approval-mode', 'auto_edit', '--skip-trust']);
+    expect(geminiArgs({ ...base, readOnly: true, model: 'gemini-2.5-flash', resumeSessionId: 'abc' }, false)).toEqual(['-p', 'p', '--output-format', 'stream-json', '-m', 'gemini-2.5-flash', '--approval-mode', 'plan', '--skip-trust', '--resume', 'abc']);
   });
 });
