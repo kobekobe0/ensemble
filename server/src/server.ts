@@ -315,9 +315,12 @@ export async function buildServer(engine: Engine, opts: ServerOptions = {}): Pro
 
   // ---- static dashboard ---------------------------------------------------------------------
   if (fs.existsSync(WEB_DIST)) {
-    await app.register(fastifyStatic, { root: WEB_DIST, prefix: '/', wildcard: false, index: ['index.html'] });
+    // wildcard routing (the default) so files from a rebuild are served without a restart
+    await app.register(fastifyStatic, { root: WEB_DIST, prefix: '/', index: ['index.html'] });
     app.setNotFoundHandler((req: FastifyRequest, reply: FastifyReply) => {
-      if (req.method === 'GET' && !req.url.startsWith('/api') && !req.url.startsWith('/ws')) {
+      const pathname = req.url.split('?')[0];
+      // SPA fallback for client routes only — a missing /assets/x.js must 404, not return HTML.
+      if (req.method === 'GET' && !pathname.startsWith('/api') && !pathname.startsWith('/ws') && !/\.[a-z0-9]+$/i.test(pathname)) {
         return reply.type('text/html').sendFile('index.html');
       }
       return reply.code(404).send({ error: 'not found' });

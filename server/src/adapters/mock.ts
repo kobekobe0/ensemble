@@ -13,7 +13,7 @@ import type { Adapter, AgentRequest, AgentResult } from './base.js';
 
 export const mockOptions = {
   /** Multiplier for the 200–800 ms delays (tests use ~0.02). */
-  speed: 1,
+  speed: Number(process.env.ENSEMBLE_MOCK_SPEED) > 0 ? Number(process.env.ENSEMBLE_MOCK_SPEED) : 1,
   /** Reset time reported by [[mock:limit]]. */
   limitResetSeconds: 60,
 };
