@@ -820,7 +820,7 @@ export class Pipeline {
     const author = t.provider!;
     try {
       const r = this.router.route('review', t.size, { exclude: [author] });
-      if (!r.limited) return { ref: r, selfReview: false };
+      if (!r.limited) return { ref: { provider: r.provider, model: r.model }, selfReview: false };
     } catch { /* fall through */ }
     if (!this.adapters.usable(author) || this.limits.isLimited(author)) return null;
     const alt = this.cfg().routing.review.find((c) => c.provider === author && c.model !== t.model)
