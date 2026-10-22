@@ -1,0 +1,3 @@
+{"type":"init","session_id":"g-limit","model":"gemini-2.5-pro"}
+{"type":"error","severity":"error","message":"[API Error: RESOURCE_EXHAUSTED: Quota exceeded for quota metric 'Gemini 2.5 Pro Requests'. Please retry in 37 seconds.]"}
+{"type":"result","status":"error","error":{"type":"API Error","message":"RESOURCE_EXHAUSTED"},"stats":{"total_tokens":0}}
