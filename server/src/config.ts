@@ -68,7 +68,7 @@ export function defaultConfig(): Config {
     allowedRoots: defaultRoots(),
     worktreeDir: path.join(dataDir(), 'worktrees'),
     maxParallel: 4,
-    providers: { claude: provider('claude'), codex: provider('codex'), gemini: provider('gemini') },
+    providers: { claude: provider('claude'), codex: provider('codex'), gemini: { ...provider('agy'), cli: 'antigravity' } },
     lead: m('claude', 'opus'),
     routing: defaultRouting(),
     learnRouting: true,
@@ -145,6 +145,7 @@ const modelRef: Check = (v, at) => {
 
 const providerShape: Record<keyof ProviderConfig, Check> = {
   enabled: bool, bin: str, maxConcurrent: int1, extraArgs: strArr, limitCooldownMinutes: num, budgetPer5h: int1,
+  cli: (v, at) => (v === 'antigravity' || v === 'gemini-cli' ? null : `${at} must be antigravity|gemini-cli`),
 };
 
 const shape: Record<keyof Config, Check> = {

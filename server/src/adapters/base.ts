@@ -177,9 +177,11 @@ export interface CliSpec {
   extraArgs: () => string[];
   /** Build argv incl. the user's extraArgs. `viaStdin` is true when the prompt is too large for argv and will be piped. */
   buildArgs(req: AgentRequest, viaStdin: boolean, extraArgs: string[]): string[];
-  makeParser(): StreamParser;
+  makeParser(req: AgentRequest): StreamParser;
   /** Whether this CLI reads the prompt from stdin when not given as an argument. */
   stdinPrompt: boolean;
+  /** Wrap the prompt for stdin (default: the raw prompt). */
+  stdinPayload?: (prompt: string) => string;
   env?: () => NodeJS.ProcessEnv;
 }
 
@@ -190,7 +192,7 @@ export function createCliAdapter(spec: CliSpec): Adapter {
     available: () => versionOf(spec.bin()),
     async run(req: AgentRequest): Promise<AgentResult> {
       const started = Date.now();
-      const parser = spec.makeParser();
+      const parser = spec.makeParser(req);
       let limited: LimitHit | null = null;
       const errors: string[] = [];
       const emit = (e: AgentEvent) => {
@@ -207,7 +209,7 @@ export function createCliAdapter(spec: CliSpec): Adapter {
       const res = await runProcess(spec.bin(), args, {
         cwd: req.cwd,
         env: spec.env?.() ?? process.env,
-        stdin: viaStdin ? req.prompt : undefined,
+        stdin: viaStdin ? (spec.stdinPayload ? spec.stdinPayload(req.prompt) : req.prompt) : undefined,
         timeoutMs: req.timeoutMs,
         signal: req.signal,
         onStdoutLine(line) {

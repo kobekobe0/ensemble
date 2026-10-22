@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { antigravityArgs, antigravityStdin, createAntigravityParser } from '../src/adapters/antigravity.js';
 import { parseLine, type StreamParser } from '../src/adapters/base.js';
 import { claudeArgs, createClaudeParser } from '../src/adapters/claude.js';
 import { codexArgs, createCodexParser } from '../src/adapters/codex.js';
@@ -127,5 +128,55 @@ describe('gemini parser', () => {
     const base = { cwd: '/w', prompt: 'p', model: '', timeoutMs: 1, signal: new AbortController().signal, onEvent: () => {} };
     expect(geminiArgs({ ...base, readOnly: false }, false)).toEqual(['-p', 'p', '--output-format', 'stream-json', '--approval-mode', 'auto_edit', '--skip-trust']);
     expect(geminiArgs({ ...base, readOnly: true, model: 'gemini-2.5-flash', resumeSessionId: 'abc' }, false)).toEqual(['-p', 'p', '--output-format', 'stream-json', '-m', 'gemini-2.5-flash', '--approval-mode', 'plan', '--skip-trust', '--resume', 'abc']);
+  });
+});
+
+describe('antigravity parser (real agy 1.4.5 captures)', () => {
+  it('maps a work turn: tool + file_change inside cwd, text, usage', () => {
+    const p = createAntigravityParser('/tmp/fixture');
+    const evs = run(p, 'antigravity-work.jsonl');
+    expect(evs[0].kind).toBe('system');
+    expect(p.sessionId).toBe('c4f00fb0-4747-4e05-84d2-c9a351db0f78');
+    expect(evs.filter((e) => e.kind === 'tool')).toHaveLength(1); // ACTIVE + DONE → one tool event
+    expect(evs.find((e) => e.kind === 'file_change')?.text).toBe('greeting.txt');
+    expect(evs.find((e) => e.kind === 'tool_result')).toBeTruthy();
+    expect(evs.find((e) => e.kind === 'log')?.text).toBe('not json {');
+    expect(p.finalText).toBe('DONE');
+    expect(p.inputTokens).toBeGreaterThan(0);
+    expect(p.error).toBeNull();
+    expect(p.denied).toBe(false);
+  });
+
+  it('joins text deltas per step and ignores writes outside the workspace', () => {
+    const p = createAntigravityParser('/tmp/fixture');
+    const evs = run(p, 'antigravity-plan.jsonl');
+    const texts = evs.filter((e) => e.kind === 'text').map((e) => e.text);
+    expect(texts).toHaveLength(1);
+    expect(texts[0]).toMatch(/^I have created the implementation plan in \[implementation_plan\.md\]/);
+    expect(evs.some((e) => e.kind === 'file_change')).toBe(false); // plan file lives in ~/.gemini/antigravity-cli/brain
+    expect(evs.some((e) => e.kind === 'tool' && e.data?.name === 'write_file')).toBe(true);
+  });
+
+  it('flags permission denials and empty replies', () => {
+    const p = createAntigravityParser('/tmp/fixture');
+    const evs = run(p, 'antigravity-denied.jsonl');
+    expect(evs.find((e) => e.kind === 'command')?.text).toBe('ls -la');
+    expect(evs.find((e) => e.kind === 'tool_result')?.data?.isError).toBe(true);
+    expect(p.denied).toBe(true);
+    expect(p.finalText).toBe('');
+  });
+
+  it('reports non-success results as errors', () => {
+    const p = createAntigravityParser();
+    parseLine(p, JSON.stringify({ event: 'result', result: { conversation_id: 'x', status: 'ERROR', error: { message: 'RESOURCE_EXHAUSTED: quota exceeded, retry in 3 hours' }, usage: {} } }));
+    expect(p.error).toMatch(/RESOURCE_EXHAUSTED/);
+  });
+
+  it('builds args with -p=<prompt> last and stdin mode', () => {
+    const base = { cwd: '/w', prompt: '-starts with dash', model: '', timeoutMs: 1, signal: new AbortController().signal, onEvent: () => {} };
+    expect(antigravityArgs({ ...base, readOnly: true }, false)).toEqual(['--output-format', 'stream-json', '--mode', 'plan', '-p=-starts with dash']);
+    expect(antigravityArgs({ ...base, readOnly: false, model: 'gemini-3.8-flash-high', resumeSessionId: 'c1' }, true, ['--sandbox']))
+      .toEqual(['--input-format', 'stream-json', '--output-format', 'stream-json', '--mode', 'accept-edits', '--model', 'gemini-3.8-flash-high', '--conversation', 'c1', '--sandbox', '-p=']);
+    expect(JSON.parse(antigravityStdin('hi'))).toEqual({ event: 'user', message: { content: 'hi' } });
   });
 });

@@ -12,7 +12,11 @@ You type a goal. A lead model plans subtasks, each subtask runs in its own **git
 - Each CLI you want to use, installed **and logged in once interactively**:
   - `claude` (Claude Code) — run `claude` once and sign in
   - `codex` (OpenAI Codex CLI) — run `codex` once and sign in
-  - `gemini` (Gemini CLI) — run `gemini` once and sign in
+  - **Gemini via Antigravity CLI** (`agy`), Google's replacement for Gemini CLI. Gemini CLI stopped serving personal Google accounts (AI Pro/Ultra/free) on 2026-06-18. Install it, then run `~/.local/bin/agy` once and choose **Google OAuth**:
+    ```bash
+    curl -fsSL https://antigravity.google/cli/install.sh | bash
+    ```
+    With a Gemini Code Assist licence or a paid API key you can keep the legacy `gemini` CLI instead: Settings → Gemini → Command-line tool.
 
 Missing or disabled CLIs are skipped by the router. One installed CLI is enough; reviews then fall back to self-review with a different model (flagged in the UI).
 
@@ -68,16 +72,18 @@ Agents always work in isolated worktrees under `~/.ensemble/worktrees`, never in
 |---|---|---|
 | Claude | `--permission-mode acceptEdits` (edits files, no arbitrary shell) | `--permission-mode plan` |
 | Codex | `--sandbox workspace-write` | `--sandbox read-only` |
-| Gemini | `--approval-mode auto_edit --skip-trust` | `--approval-mode plan --skip-trust` |
+| Gemini (Antigravity `agy`, default) | `--mode accept-edits` | `--mode plan` |
+| Gemini (legacy `gemini` CLI) | `--approval-mode auto_edit --skip-trust` | `--approval-mode plan --skip-trust` |
 
 To give agents more autonomy, add flags under Settings → Providers → **Extra args** (appended to every call):
 
 - Claude, allow builds: `--allowedTools "Bash(npm *)" "Bash(pnpm *)" "Bash(dotnet *)"`
 - Claude, full autonomy (opt-in only): `--dangerously-skip-permissions`
 - Codex, full autonomy (opt-in only, no sandbox): `--dangerously-bypass-approvals-and-sandbox`
-- Gemini: `--yolo`
+- Gemini via Antigravity: shell commands are denied in headless mode unless allowed. Add rules to `~/.gemini/antigravity-cli/settings.json`, e.g. `{"permissions": {"allow": ["command(npm)", "command(pnpm)"]}}`. For full autonomy (opt-in only), add `--dangerously-skip-permissions` to Extra args. If Antigravity ends a turn empty after a denied command, Ensemble resumes that conversation once and asks it to continue with file tools.
+- Gemini via legacy CLI: `--yolo`
 
-Gemini's `--skip-trust` trusts each task worktree for that one invocation only, so headless runs don't abort in a new folder. It doesn't add the folder to Gemini's trusted list. Flags were verified against claude 2.1.296, codex-cli 0.163 and gemini 0.65. After a CLI update, run `pnpm smoke` (or `pnpm smoke codex`). It runs a tiny read-only prompt and prints the normalized events, so you can confirm the parsers still match.
+Gemini's `--skip-trust` trusts each task worktree for that one invocation only, so headless runs don't abort in a new folder. It doesn't add the folder to Gemini's trusted list. Flags were verified against claude 2.1.296, codex-cli 0.163, agy 1.4.5 and gemini 0.65. After a CLI update, run `pnpm smoke` (or `pnpm smoke codex`). It runs a tiny read-only prompt and prints the normalized events, so you can confirm the parsers still match.
 
 ## 7. Keep the Mac awake and online
 

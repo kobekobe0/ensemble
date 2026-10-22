@@ -61,6 +61,18 @@ function ProviderSettings({ id, pc, onChange }: { id: RealProviderId; pc: Provid
   return (
     <div className="review-item">
       <div className="spread"><ProviderBadge provider={id} /><label className="check"><input type="checkbox" checked={pc.enabled} onChange={(e) => onChange({ ...pc, enabled: e.target.checked })} /> enabled</label></div>
+      {id === 'gemini' && (
+        <label className="field">Command-line tool
+          <select value={pc.cli ?? 'antigravity'} onChange={(e) => {
+            const cli = e.target.value as 'antigravity' | 'gemini-cli';
+            const bin = cli === 'antigravity' ? (pc.bin === 'gemini' ? 'agy' : pc.bin) : (pc.bin === 'agy' ? 'gemini' : pc.bin);
+            onChange({ ...pc, cli, bin });
+          }}>
+            <option value="antigravity">Antigravity CLI (agy) — personal Google accounts</option>
+            <option value="gemini-cli">Gemini CLI (legacy) — Code Assist licences or API key only</option>
+          </select>
+        </label>
+      )}
       <div className="grid2" style={{ gap: 8 }}>
         <label className="field">Binary (name or absolute path)<input className="mono" value={pc.bin} onChange={(e) => onChange({ ...pc, bin: e.target.value })} /></label>
         <label className="field">Extra args (appended to every call)<input className="mono" value={args} placeholder='e.g. --allowedTools "Bash(npm *)"' onChange={(e) => setArgs(e.target.value)} onBlur={() => onChange({ ...pc, extraArgs: splitArgs(args) })} /></label>

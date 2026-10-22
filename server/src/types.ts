@@ -60,6 +60,8 @@ export interface ProviderConfig {
   extraArgs: string[];
   limitCooldownMinutes: number;
   budgetPer5h: number;
+  /** gemini only: which CLI drives the provider. Gemini CLI no longer serves personal Google accounts. */
+  cli?: 'antigravity' | 'gemini-cli';
 }
 
 export interface Config {

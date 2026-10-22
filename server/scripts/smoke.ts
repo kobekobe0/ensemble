@@ -1,6 +1,6 @@
 // Phase 6 smoke test against the REAL installed CLIs (uses a little of your quota).
 //   pnpm smoke                # every installed + enabled provider
-//   pnpm smoke claude gemini  # only these
+//   pnpm smoke claude gemini  # only these (gemini = Antigravity `agy` by default)
 // Runs a tiny read-only prompt in a temp folder and prints the normalized events, so parsers can be
 // checked (and fixed) against the CLI versions actually installed on this machine.
 import fs from 'node:fs';
@@ -11,7 +11,7 @@ import { loadConfig } from '../src/config.js';
 import type { AgentEvent, RealProviderId } from '../src/types.js';
 import { REAL_PROVIDERS } from '../src/types.js';
 
-const PROMPT = 'List the files in this directory, then reply DONE';
+const PROMPT = 'Read the files hello.txt and notes.md in the current directory, tell me in one sentence what they contain, then reply DONE';
 const wanted = process.argv.slice(2).filter((a) => REAL_PROVIDERS.includes(a as RealProviderId)) as RealProviderId[];
 const cfg = loadConfig();
 const registry = new AdapterRegistry(() => cfg, false);
